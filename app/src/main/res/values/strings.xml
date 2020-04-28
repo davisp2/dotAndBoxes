@@ -1,3 +1,16 @@
 <resources>
     <string name="app_name">dotAndBoxes</string>
+    <string name="user_name">Enter username</string>
+    <string name="log_in">LOG IN</string>
+    <string name="create_game">Create New Game</string>
+    <string name="retry_connection">Retry Connection</string>
+    <string name="open_lobby">Open Lobbies:</string>
+    <string name="game_owner">%s\' Game</string>
+    <string name="game_size">Game Size: %1$o by %2$o</string>
+    <string name="join">Join Game</string>
+    <string name="exit">Exit Game</string>
+    <string name="end">Exit</string>
+    <string name="cancel">Cancel</string>
+    <string name="end_conf">Are you sure you want to exit?</string>
+    <string name="attribute">expand</string>
 </resources>
