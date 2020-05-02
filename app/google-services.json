@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "330596732605",
+    "firebase_url": "https://cs125-dotandboxes.firebaseio.com",
+    "project_id": "cs125-dotandboxes",
+    "storage_bucket": "cs125-dotandboxes.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:330596732605:android:11cd6adb4136e16f2571d4",
+        "android_client_info": {
+          "package_name": "com.example.dotandboxes"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "330596732605-n1edeth3vus1f5juheccsud8r4jkbpkk.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCJipALTt_DgpuuQte9fkEgMZht4Dngqxo"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "330596732605-n1edeth3vus1f5juheccsud8r4jkbpkk.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -5,8 +5,9 @@
     <string name="create_game">Create New Game</string>
     <string name="retry_connection">Retry Connection</string>
     <string name="open_lobby">Open Lobbies:</string>
-    <string name="game_owner">%s\' Game</string>
-    <string name="game_size">Game Size: %1$o by %2$o</string>
+    <string name="game_owner">%s\'s Game</string>
+    <string name="display_user">Welcome %s!</string>
+    <string name="game_size">Game Size: %1$d by %2$d</string>
     <string name="join">Join Game</string>
     <string name="exit">Exit Game</string>
     <string name="end">Exit</string>

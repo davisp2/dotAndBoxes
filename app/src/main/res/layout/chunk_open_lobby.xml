@@ -22,7 +22,7 @@
                 android:layout_height="match_parent"
                 android:text="@string/game_owner"
                 android:layout_weight="1"
-                android:textSize="24sp" />
+                android:textSize="20sp" />
 
             <ImageView
                 android:id="@+id/headerIndicator"
