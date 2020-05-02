@@ -16,7 +16,6 @@ public class GameView extends View {
     private void init() {
         paint.setColor(Color.BLACK);
         paint.setStrokeWidth(lineThickness);
-        this.setPadding(20, 20, 0 , 0);
     }
 
     public GameView(Context context) {
