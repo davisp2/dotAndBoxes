@@ -12,7 +12,7 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="87dp"
         android:layout_marginLeft="87dp"
-        android:layout_marginTop="243dp"
+        android:layout_marginTop="143dp"
         android:layout_marginEnd="87dp"
         android:layout_marginRight="87dp"
         android:text="Place Holder Text: Welcome to Game"
@@ -30,4 +30,13 @@
         android:text="@string/exit"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
+
+    <com.example.dotandboxes.GameView
+        android:layout_width="400dp"
+        android:layout_height="400dp"
+        tools:layout_editor_absoluteX="5dp"
+        tools:layout_editor_absoluteY="322dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/textView" />
 </androidx.constraintlayout.widget.ConstraintLayout>
