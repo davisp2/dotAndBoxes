@@ -1,6 +1,7 @@
 package com.example.dotandboxes;
 
 import android.content.Context;
+import android.content.res.Resources;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
@@ -8,12 +9,19 @@ import android.util.AttributeSet;
 import android.view.View;
 
 public class GameView extends View {
-    final private int lineLength = 150;
-    final private int lineThickness = 20;
-    private Paint paint = new Paint();
-    private GameBoard board = new GameBoard(4);
+    private int lineLength;
+    private int lineThickness;
+    private Paint paint;
+    private GameBoard board;
 
     private void init() {
+        int size = 8;
+        paint = new Paint();
+        board = new GameBoard(size);
+        lineLength = (int) Math.ceil((double) Resources.getSystem().getDisplayMetrics().widthPixels * .75
+                / (double) size);
+        lineThickness = (int) Math.ceil((double) lineLength * .1);
+        System.out.println(getWidth() + " : " + size + " : " + lineLength + " : " + lineThickness);
         paint.setColor(Color.BLACK);
         paint.setStrokeWidth(lineThickness);
     }
@@ -35,13 +43,14 @@ public class GameView extends View {
 
     @Override
     public void onDraw(Canvas canvas) {
-        //drawing the board
+        //declaring variables
         int s = board.getSize();
         int xOrigin = getWidth() / 2 - (s * lineLength) / 2;
         int yOrigin = getHeight() / 2 - (s * lineLength) / 2;
 
-        int[][] cO = board.getCellOwnership();
+        //DRAWING BOARD
         //drawing colored cells first
+        int[][] cO = board.getCellOwnership();
         for (int i = 0; i < s; i++) {
             for (int j = 0; j < s; j++) {
                 if (cO[i][j] == 1) {
