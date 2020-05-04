@@ -5,6 +5,7 @@ import android.content.res.Resources;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.graphics.Paint.Align;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
@@ -22,7 +23,10 @@ public class GameView extends View {
         //note: this size is at a temporary value. If we have time, we can add an option
         //for the user to change the size.
         int size = 3;
+        float textSize = 100;
         paint = new Paint();
+        paint.setTextSize(textSize);
+        paint.setTextAlign(Align.CENTER);
         board = new GameBoard(size);
         double viewWidth = Resources.getSystem().getDisplayMetrics().widthPixels;
         double viewHeight = Resources.getSystem().getDisplayMetrics().heightPixels;
@@ -147,6 +151,26 @@ public class GameView extends View {
         for (int i = 0; i < s + 1; i++) {
             for (int j = 0;  j < s + 1; j++) {
                 canvas.drawPoint(i * lineLength  + xOrigin, j * lineLength  + yOrigin, paint);
+            }
+        }
+
+        //drawing Text score
+        int[] score = board.getScore();
+
+        if (score[0] + score[1] < s * s) {
+            canvas.drawText("Red: " + score[0] + " Blue: " + score[1], (float) (boardX + boardWidth / 2),
+                    (float) (boardY - boardHeight / 4), paint);
+        } else {
+            //display winner
+            if (score[0] > score[1]){
+                canvas.drawText("Red Wins!", (float) (boardX + boardWidth / 2),
+                    (float) (boardY - boardHeight / 4), paint);
+            } else if (score[0] < score[1]) {
+                canvas.drawText("Blue Wins!", (float) (boardX + boardWidth / 2),
+                        (float) (boardY - boardHeight / 4), paint);
+            } else {
+                canvas.drawText("It's a Tie!", (float) (boardX + boardWidth / 2),
+                        (float) (boardY - boardHeight / 4), paint);
             }
         }
     }
