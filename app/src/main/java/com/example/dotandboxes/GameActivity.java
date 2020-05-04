@@ -25,7 +25,10 @@ public class GameActivity extends AppCompatActivity {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setMessage(R.string.end_conf);
         builder.setNegativeButton(R.string.cancel, null);
-        builder.setPositiveButton(R.string.end, (unused1, unused2) -> finish());
+        builder.setPositiveButton(R.string.end, (unused1, unused2) -> {
+            //add log out of room feature
+            finish();}
+            );
         builder.create().show();
     }
 }
