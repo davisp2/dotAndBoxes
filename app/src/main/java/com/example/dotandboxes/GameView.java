@@ -21,7 +21,7 @@ public class GameView extends View {
     private void init() {
         //note: this size is at a temporary value. If we have time, we can add an option
         //for the user to change the size.
-        int size = 15;
+        int size = 3;
         paint = new Paint();
         board = new GameBoard(size);
         double viewWidth = Resources.getSystem().getDisplayMetrics().widthPixels;
