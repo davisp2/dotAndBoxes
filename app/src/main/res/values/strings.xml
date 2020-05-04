@@ -14,7 +14,7 @@
     <string name="cancel">Cancel</string>
     <string name="loggingin">LOGGING IN</string>
     <string name="create">Create</string>
-    <string name="end_conf">Are you sure you want to exit?</string>
+    <string name="end_conf">Are you sure you want to exit? </string>
     <string name="attribute">expand</string>
     <string name="slide_start">3 by 3</string>
     <string name="slide_end">30 by 30</string>

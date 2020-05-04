@@ -6,6 +6,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.LinearLayout;
@@ -28,6 +29,7 @@ public class MenuActivity extends AppCompatActivity {
     DatabaseReference lobbyRef;
     DatabaseReference newRoomRef;
     Button createGame;
+    Map<String, Long> lobbyList;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -48,7 +50,6 @@ public class MenuActivity extends AppCompatActivity {
             createGame.setEnabled(false);
             createGame();
         });
-
         //handles connection in multiplayer
         findViewById(R.id.retryConnectButton).setOnClickListener(unused -> connect());
         connect();
@@ -74,7 +75,7 @@ public class MenuActivity extends AppCompatActivity {
         ownerLabel.setText(getResources().getString(R.string.game_owner, playerName));
         newRoomRef = database.getReference("rooms/" + playerName);
         newRoomRef.child("player1").setValue(playerName);
-
+        newRoomRef.child("size").setValue(3);
         SeekBar bar = findViewById(R.id.seekBar);
         TextView sizeDisplay = findViewById(R.id.sizeDisplay);
         sizeDisplay.setText(getResources().getString(R.string.game_size, 3, 3));
@@ -105,54 +106,53 @@ public class MenuActivity extends AppCompatActivity {
 
 
     private void connect() {
+        Log.d("MenuActivity", "connect");
         findViewById(R.id.OpenLobbyGroup).setVisibility(View.GONE);
         findViewById(R.id.loadGroup).setVisibility(View.GONE);
-
-        //more implementation when we connect to firebase
-        Map<String, Integer> openLobby = new HashMap<>();
-        openLobby.put("placeHolder", 3);
-        openLobby.put("test", 10);
-        openLobby.put("subject", 30);
-        setUpUi(openLobby);
+        getLobbies();
     }
 
-    //not yet put to use
-    private Map<String, Integer> getLobbies() {
-        Map<String, Integer> lobby = new HashMap<>();
+    private void getLobbies() {
+        lobbyList = new HashMap<>();
         lobbyRef = database.getReference("rooms");
         lobbyRef.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 Iterable<DataSnapshot> rooms = dataSnapshot.getChildren();
                 for(DataSnapshot snapshot: rooms) {
-                    lobby.put((String) snapshot.child("player1").getValue(),
-                            (Integer) snapshot.child("roomSize").getValue());
+                    if (snapshot.child("player2").getValue() == null) {
+                        Long size = (Long) snapshot.child("size").getValue();
+                        lobbyList.put((String) snapshot.child("player1").getValue(), size);
+                    }
                 }
+                setUpUi(lobbyList);
             }
             @Override
             public void onCancelled(@NonNull DatabaseError databaseError) {
                 //error
             }
-
         });
-        return lobby;
     }
 
 
-    private void setUpUi(Map<String, Integer> lobby) {
-        //these are placeholder values that will be changed
+    private void setUpUi(Map<String, Long> lobby) {
         findViewById(R.id.OpenLobbyGroup).setVisibility(View.VISIBLE);
 
         LinearLayout openLayout = findViewById(R.id.openGamesList);
         openLayout.removeAllViews();
         openLayout.setVisibility(View.VISIBLE);
-        for (Map.Entry<String, Integer> room : lobby.entrySet()) {
+        for (Map.Entry<String, Long> room : lobby.entrySet()) {
+            Log.d("Menu", room.getKey());
             View chunk = getLayoutInflater().inflate(R.layout.chunk_open_lobby,
                     openLayout, false);
             openLayout.addView(chunk);
             Button join = chunk.findViewById(R.id.join_game);
             join.setOnClickListener(v -> {
-                startActivity(new Intent(this, GameActivity.class));
+                lobbyRef = database.getReference("rooms");
+                lobbyRef.child(room.getKey()).child("player2").setValue(playerName);
+                Intent intent = new Intent(this, GameActivity.class);
+                intent.putExtra("gameID", room.getKey());
+                startActivity(intent);
             });
             TextView ownerLabel = chunk.findViewById(R.id.game_owner);
             ownerLabel.setText(getResources().getString(R.string.game_owner, room.getKey()));
