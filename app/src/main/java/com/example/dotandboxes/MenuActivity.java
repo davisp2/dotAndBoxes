@@ -27,6 +27,7 @@ public class MenuActivity extends AppCompatActivity {
     String playerName;
     DatabaseReference lobbyRef;
     DatabaseReference newRoomRef;
+    Button createGame;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -36,12 +37,17 @@ public class MenuActivity extends AppCompatActivity {
 
         database = FirebaseDatabase.getInstance();
         SharedPreferences pref = getSharedPreferences("PREFS", 0);
-        playerName = pref.getString("playerName", "");
+        playerName = pref.getString("username", "");
+
         TextView t =findViewById(R.id.nameDisplay);
         t.setText(getResources().getString(R.string.display_user, playerName));
 
         //this part will handle creating the new game
-        findViewById(R.id.createGame).setOnClickListener(unused -> createGame());
+        createGame = findViewById(R.id.createGame);
+        createGame.setOnClickListener(unused -> {
+            createGame.setEnabled(false);
+            createGame();
+        });
 
         //handles connection in multiplayer
         findViewById(R.id.retryConnectButton).setOnClickListener(unused -> connect());
@@ -55,6 +61,7 @@ public class MenuActivity extends AppCompatActivity {
     }
 
     private void createGame() {
+
 
         LinearLayout createLayout = findViewById(R.id.createGameBlock);
         createLayout.removeAllViews();
@@ -89,8 +96,11 @@ public class MenuActivity extends AppCompatActivity {
             public void onStartTrackingTouch(SeekBar seekBar) {
             }
         });
-        intent.putExtra("roomName", playerName);
-        startActivity(intent);
+        Button create = findViewById(R.id.create);
+        create.setOnClickListener(unused -> {
+            intent.putExtra("roomName", playerName);
+            startActivity(intent);
+        });
     }
 
 
@@ -106,7 +116,7 @@ public class MenuActivity extends AppCompatActivity {
         setUpUi(openLobby);
     }
 
-    //not yet put to use 
+    //not yet put to use
     private Map<String, Integer> getLobbies() {
         Map<String, Integer> lobby = new HashMap<>();
         lobbyRef = database.getReference("rooms");
