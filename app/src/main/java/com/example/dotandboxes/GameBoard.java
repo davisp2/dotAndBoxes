@@ -1,12 +1,11 @@
 package com.example.dotandboxes;
 
-import java.util.Arrays;
-
 public class GameBoard {
     private int size;
     private boolean[][] horizontalLines;
     private boolean[][] verticalLines;
     private int[][] cellOwnership;
+    private int[] score;
 
     GameBoard(final int setSize) {
         if (setSize <= 0) {
@@ -16,9 +15,7 @@ public class GameBoard {
         horizontalLines = new boolean[size][size + 1];
         verticalLines = new boolean[size + 1][size];
         cellOwnership = new int[size][size];
-        //(below are temporary value setting for testing)
-        cellOwnership[1][1] = 1;
-        cellOwnership[1][2] = 2;
+        score = new int[2];
     }
 
     public void placeLine(int x, int y, int player, String lineType) {
@@ -38,26 +35,13 @@ public class GameBoard {
             if (horizontalLines[x][y] && horizontalLines[x][y + 1]
                     && verticalLines[x][y] && verticalLines[x + 1][y]) {
                 cellOwnership[x][y] = player;
+                score[player - 1]++;
             }
         }
     }
 
-    public int[] findScore() {
-        int[] toReturn = new int[2];
-        int countPlayerOne = 0;
-        int countPlayerTwo = 0;
-        for (int i = 0; i < size; i++) {
-            for (int j = 0; j < size; j++) {
-                if (cellOwnership[i][j] == 1) {
-                    countPlayerOne++;
-                } else if (cellOwnership[i][j] == 2) {
-                    countPlayerTwo++;
-                }
-            }
-        }
-        toReturn[0] = countPlayerOne;
-        toReturn[1] = countPlayerTwo;
-        return toReturn;
+    public int[] getScore() {
+        return score;
     }
 
     public int getSize() {
