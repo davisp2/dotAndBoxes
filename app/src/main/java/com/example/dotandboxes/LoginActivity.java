@@ -32,7 +32,14 @@ public class LoginActivity extends AppCompatActivity {
 
         //checks if the player already exists
         SharedPreferences preferences = getSharedPreferences("PREFS", 0);
-        userName = preferences.getString("playerName", "");
+        SharedPreferences.Editor edit = preferences.edit();
+        edit.clear();
+        edit.apply();
+
+        SharedPreferences update = getSharedPreferences("UPDATES", 0);
+        SharedPreferences.Editor editg = preferences.edit();
+        editg.clear();
+        editg.apply();
 
         login = findViewById(R.id.login);
         login.setOnClickListener(new View.OnClickListener() {
@@ -60,6 +67,7 @@ public class LoginActivity extends AppCompatActivity {
                     SharedPreferences pref = getSharedPreferences("PREFS", 0);
                     SharedPreferences.Editor editor = pref.edit();
                     editor.putString("username", userName);
+                    editor.putInt("size", 3);
                     editor.apply();
 
                    startActivity(new Intent(getApplicationContext(), MenuActivity.class));

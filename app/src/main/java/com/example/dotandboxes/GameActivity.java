@@ -49,7 +49,6 @@ public class GameActivity extends AppCompatActivity {
         roomRef.child("player" + other).child("player").addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot data) {
-                System.out.println(data.exists());
                 if (data.exists()) {
                     otherPlayer = data.getValue().toString();
                     if (playerID.equals("player1")) {
@@ -57,8 +56,8 @@ public class GameActivity extends AppCompatActivity {
                     } else {
                         playerColor.setText(getResources().getString(R.string.player, "BLUE", otherPlayer));
                     }
-                    System.out.println(otherPlayer);
-                    SharedPreferences pref = getSharedPreferences("start", 0);
+
+                    SharedPreferences pref = getSharedPreferences("PREFS", 0);
                     SharedPreferences.Editor editor = pref.edit();
                     editor.putBoolean("start", true);
                     editor.apply();
@@ -91,11 +90,11 @@ public class GameActivity extends AppCompatActivity {
         roomRef.child("player" + other).addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot data) {
-                if (data.child("x").exists() && data.child("y").exists()) {
-                    double x = (double) data.child("x").getValue();
-                    double y = (double) data.child("y").getValue();
-                    System.out.println(x + " and " + y);
-                    packageInfo(x,y, other);
+                if (data.child("x").exists() && data.child("y").exists() && data.child("direction").exists()) {
+                    long x = (long) data.child("x").getValue();
+                    long y = (long) data.child("y").getValue();
+                    String dir = data.child("direction").getValue().toString();
+                    packageInfo(x,y, other, dir);
                     findViewById(R.id.gameView).postInvalidate();
                 }
             }
@@ -118,14 +117,15 @@ public class GameActivity extends AppCompatActivity {
     }
 
 
-    private void packageInfo(double x, double y, int p) {
+    private void packageInfo(long x, long y, int p, String dir) {
         SharedPreferences pref = getSharedPreferences("UPDATES", 0);
         SharedPreferences.Editor editor = pref.edit();
+        editor.clear();
         editor.putInt("player", p);
-        editor.putFloat("x",(float) x);
-        editor.putFloat("y", (float) y);
+        editor.putInt("x",(int) x);
+        editor.putInt("y", (int) y);
+        editor.putString("direction", dir);
         editor.apply();
-        System.out.println(pref.getFloat("x", -1.2f));
     }
 
 
@@ -149,6 +149,11 @@ public class GameActivity extends AppCompatActivity {
                 roomRef.child("host left").setValue("true");
                 roomRef.removeValue();
             }
+            SharedPreferences pref = getSharedPreferences("PREFS", 0);
+            SharedPreferences.Editor editor = pref.edit();
+            editor.putBoolean("start", false);
+            System.out.println(pref.getBoolean("start", false));
+            editor.apply();
             finish();}
             );
         builder.create().show();

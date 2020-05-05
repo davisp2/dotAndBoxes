@@ -19,14 +19,16 @@ public class GameBoard {
     }
 
     public void placeLine(int x, int y, int player, String lineType) {
-        if (lineType.equals("horizontal") && !horizontalLines[x][y]) {
-            horizontalLines[x][y] = true;
-            checkCellCaptured(x, y, player);
-            checkCellCaptured(x, y - 1, player);
-        } else if (lineType.equals("vertical") && !verticalLines[x][y]) {
-            verticalLines[x][y] = true;
-            checkCellCaptured(x, y, player);
-            checkCellCaptured(x - 1, y, player);
+        if (x >= 0 && y >= 0) {
+            if (lineType.equals("horizontal") && !horizontalLines[x][y]) {
+                horizontalLines[x][y] = true;
+                checkCellCaptured(x, y, player);
+                checkCellCaptured(x, y - 1, player);
+            } else if (lineType.equals("vertical") && !verticalLines[x][y]) {
+                verticalLines[x][y] = true;
+                checkCellCaptured(x, y, player);
+                checkCellCaptured(x - 1, y, player);
+            }
         }
     }
 

@@ -34,7 +34,7 @@ public class GameView extends View {
 
     private void init() {
         SharedPreferences pref = getContext().getSharedPreferences("PREFS", 0);
-        int size = pref.getInt("size", 0);
+        int size = pref.getInt("size", 3);
         playerID = pref.getString("playerID", "");
         String roomID = pref.getString("room", "");
         db = FirebaseDatabase.getInstance();
@@ -80,55 +80,65 @@ public class GameView extends View {
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
-        if (event.getAction() == MotionEvent.ACTION_UP && board != null) {
+        boolean started = getContext().getSharedPreferences("PREFS",0).getBoolean("start", false);
+        System.out.println(started);
+        if (event.getAction() == MotionEvent.ACTION_UP && started) {
             float x = event.getX();
             float y = event.getY();
-            drawNew(x, y, player);
+            if (x >= boardX && x <= boardX + boardWidth && y >= boardY && y <= boardY + boardHeight) {
+                x -= boardX;
+                y -= boardY;
+
+                float disX = x % lineLength;
+                float disY = y % lineLength;
+                int cellX = (int) (x / lineLength);
+                int cellY = (int) (y / lineLength);
+                String direction;
+                if (disX + disY > lineLength) {
+                    if (disX > disY) {
+                        board.placeLine(cellX + 1, cellY, player, "vertical");
+                        direction = "vertical";
+                        System.out.println("draw" + cellX + 1 + "" + cellY + "for" + player + direction);
+                        roomRef.child(playerID).child("x").setValue(cellX + 1);
+                        roomRef.child(playerID).child("y").setValue(cellY);
+                    } else {
+                        board.placeLine(cellX, cellY + 1, player, "horizontal");
+                        direction = "horizontal";
+                        roomRef.child(playerID).child("x").setValue(cellX);
+                        roomRef.child(playerID).child("y").setValue(cellY + 1);
+                        System.out.println("draw" + cellX + "" + cellY + 1 + "for" + player + direction);
+                    }
+                } else {
+                    if (disX > disY) {
+                        board.placeLine(cellX, cellY, player, "horizontal");
+                        direction = "horizontal";
+                        System.out.println("draw" + cellX + "" + cellY + "for" + player + direction);
+                    } else {
+                        board.placeLine(cellX, cellY, player, "vertical");
+                        direction = "vertical";
+                        System.out.println("draw" + cellX + "" + cellY + "for" + player + direction);
+                    }
+                    roomRef.child(playerID).child("x").setValue(cellX);
+                    roomRef.child(playerID).child("y").setValue(cellY);
+                }
+                roomRef.child(playerID).child("direction").setValue(direction);
+            }
             invalidate();
-            roomRef.child(playerID).child("x").setValue(x);
-            roomRef.child(playerID).child("y").setValue(y);
         }
         return true;
     }
 
-    private void drawNew(float x, float y, int p) {
-        if (x >= boardX && x <= boardX + boardWidth && y >= boardY && y <= boardY + boardHeight) {
-            x -= boardX;
-            y -= boardY;
+    private void drawNew(boolean disc, float x, float y, int p) {
 
-            float disX = x % lineLength;
-            float disY = y % lineLength;
-            int cellX = (int) (x / lineLength);
-            int cellY = (int) (y / lineLength);
-            String direction;
-            if (disX + disY > lineLength) {
-                if (disX > disY) {
-                    board.placeLine(cellX + 1, cellY, p, "vertical");
-                    direction = "vertical";
-                } else {
-                    board.placeLine(cellX, cellY + 1, p, "horizontal");
-                    direction = "horizontal";
-                }
-            } else {
-                if (disX > disY) {
-                    board.placeLine(cellX, cellY, p, "horizontal");
-                    direction = "vertical";
-                } else {
-                    board.placeLine(cellX, cellY, p, "vertical");
-                    direction = "horizontal";
-                }
-            }
-        }
     }
 
     @Override
     public void onDraw(Canvas canvas) {
-
-        SharedPreferences star = getContext().getSharedPreferences("start", 0);
-        if (star.getBoolean("start", false)) {
+        boolean started = getContext().getSharedPreferences("PREFS",0).getBoolean("start", false);
+        if (started) {
             SharedPreferences pack = getContext().getSharedPreferences("UPDATES", 0);
-            System.out.println(pack.getFloat("x", -1.2f) + "here");
-            drawNew(pack.getFloat("x", -1.0342f), pack.getFloat("y", -1.0123f), pack.getInt("player", 0));
+            board.placeLine(pack.getInt("x", -1), pack.getInt("y", -1),
+                    (player + 1)%2, pack.getString("direction", ""));
         }
 
                //declaring variables

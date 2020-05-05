@@ -30,7 +30,7 @@ public class MenuActivity extends AppCompatActivity {
     DatabaseReference newRoomRef;
     Button createGame;
     Map<String, Long> lobbyList;
-    DatabaseReference playerRef;
+    private int value;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -98,7 +98,7 @@ public class MenuActivity extends AppCompatActivity {
         bar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                int value = 3 + (progress);
+                value = 3 + (progress);
                 sizeDisplay.setText(getResources().getString(R.string.game_size, value, value));
                 newRoomRef.child("size").setValue(value);
                 SharedPreferences pref = getSharedPreferences("PREFS", 0);
@@ -120,8 +120,10 @@ public class MenuActivity extends AppCompatActivity {
             SharedPreferences.Editor editor = pref.edit();
             editor.putString("room", playerName);
             editor.putString("playerID", "player1");
+            editor.putBoolean("started", false);
             editor.apply();
             newRoomRef.child("player1").child("player").setValue(playerName);
+            System.out.println(pref.getBoolean("start", false) + "at launch");
             startActivity(intent);
         });
     }
