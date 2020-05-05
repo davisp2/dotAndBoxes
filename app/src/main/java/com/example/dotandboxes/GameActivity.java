@@ -27,6 +27,7 @@ public class GameActivity extends AppCompatActivity {
     String playerID;
     String otherPlayer = "none";
 
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -36,120 +37,68 @@ public class GameActivity extends AppCompatActivity {
         playerName = pref.getString("username", "");
         roomID = pref.getString("room", "");
         roomRef = database.getReference("rooms/" + roomID);
+        playerID = pref.getString("playerID", "");
+        String other;
+        if (playerID.equals("player1")) {
+            other = "player2";
+        } else {
+            other = "player1";
+        }
+        setContentView(R.layout.activity_game);
+        TextView playerColor = findViewById(R.id.textView);
 
-        //this to detect if game owner leaves the game
-        database.getReference("rooms").addChildEventListener(new ChildEventListener() {
+        roomRef.child(other).child("player").addValueEventListener(new ValueEventListener() {
             @Override
-            public void onChildAdded(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {}
+            public void onDataChange(@NonNull DataSnapshot data) {
+                if (data.exists()) {
+                    otherPlayer = data.getValue().toString();
+                    if (playerID.equals("player1")) {
+                        playerColor.setText(getResources().getString(R.string.player, "RED", otherPlayer));
+                    } else {
+                        playerColor.setText(getResources().getString(R.string.player, "BLUE", otherPlayer));
+                    }
+                    SharedPreferences pref = getSharedPreferences("start", 0);
+                    SharedPreferences.Editor editor = pref.edit();
+                    editor.putBoolean("start", true);
+                    editor.apply();
+                }
+            }
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+            }
+        });
 
+        roomRef.addValueEventListener(new ValueEventListener() {
             @Override
-            public void onChildRemoved(@NonNull DataSnapshot dataSnapshot) {
-                if (dataSnapshot.getKey().equals(roomID)) {
+            public void onDataChange(DataSnapshot data) {
+                if (!data.exists()){
                     finish();
                 }
             }
-
             @Override
-            public void onChildChanged(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {}
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+            }
+        });
 
+        roomRef.child(other).addValueEventListener(new ValueEventListener() {
             @Override
-            public void onChildMoved(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
+            public void onDataChange(@NonNull DataSnapshot data) {
+                if (data.child("x").exists() && data.child("y").exists() && data.child("direction").exists()) {
+                    String direction = data.child("direction").getValue().toString();
+                    long x = (long) data.child("x").getValue();
+                    long y = (long) data.child("y").getValue();
+                    System.out.println(data.getValue());
+                    packageInfo(x,y, other, direction);
+                }
             }
 
             @Override
             public void onCancelled(@NonNull DatabaseError databaseError) {
             }
         });
-        database.getReference("rooms").child(roomID).addChildEventListener(new ChildEventListener() {
-            @Override
-            public void onChildAdded(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {}
-
-            @Override
-            public void onChildRemoved(@NonNull DataSnapshot dataSnapshot) {
-            }
-
-            @Override
-            public void onChildChanged(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
-                if (dataSnapshot.exists()) {
-                    if (playerID.equals("player1")) {
-                        Object player2 = dataSnapshot.child("player2").getValue();
-                        if (player2 != null && !player2.toString().equals("")) {
-                            otherPlayer = player2.toString();
-                        }
-
-                    } else {
-                        otherPlayer = dataSnapshot.child("player1").getValue().toString();
-                    }
-                    System.out.println(otherPlayer);
-                }
-            }
-
-            @Override
-            public void onChildMoved(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
-            }
-        });
-        playerID = pref.getString("playerID", "");
 
 
-        setContentView(R.layout.activity_game);
 
-        TextView playerColor = findViewById(R.id.textView);
-        if (playerID.equals("player1")) {
-            playerColor.setText(getResources().getString(R.string.player, "RED", otherPlayer));
-        } else {
-            playerColor.setText(getResources().getString(R.string.player, "BLUE", otherPlayer));
-        }
-
-        String otherP;
-        if (playerID.equals("player1")) {
-            otherP = "player2";
-        } else {
-            otherP = "player1";
-        }
-        System.out.println(otherP + "xxxxxxxxxxxxxxxxxxxxxxx");
-        roomRef.child(otherP).addChildEventListener(new ChildEventListener() {
-            @Override
-            public void onChildAdded(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
-                if (dataSnapshot.exists()) {
-                    String direction = (String) dataSnapshot.child("direction").getValue();
-                    System.out.println(direction);
-                    long x = (Long) dataSnapshot.child("x").getValue();
-                    long y = (Long) dataSnapshot.child("y").getValue();
-                    System.out.println(x + "" + y);
-                    packageInfo(x, y, otherPlayer, direction);
-                    findViewById(R.id.gameView).invalidate();
-                }
-            }
-
-            @Override
-            public void onChildChanged(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
-                if (dataSnapshot.exists()) {
-                    String direction = (String) dataSnapshot.child("direction").getValue();
-                    System.out.println(direction);
-                    long x = (Long) dataSnapshot.child("x").getValue();
-                    long y = (Long) dataSnapshot.child("y").getValue();
-                    System.out.println(x + "" + y);
-                    packageInfo(x, y, otherPlayer, direction);
-                    findViewById(R.id.gameView).invalidate();
-                }
-            }
-
-            @Override
-            public void onChildRemoved(@NonNull DataSnapshot dataSnapshot) {
-            }
-
-            @Override
-            public void onChildMoved(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
-            }
-        });
 
         //the exit game button
         Button exit = findViewById(R.id.exit);
@@ -160,16 +109,19 @@ public class GameActivity extends AppCompatActivity {
 
     private void packageInfo(long x, long y, String p, String d) {
         SharedPreferences pref = getSharedPreferences("UPDATE", 0);
-        SharedPreferences.Editor editor = pref.edit();
-        if (p.equals("player1")) {
-            editor.putInt("player", 1);
-        } else {
-            editor.putInt("player", 2);
+        boolean send = pref.getBoolean("start", false);
+        if (send) {
+            SharedPreferences.Editor editor = pref.edit();
+            if (p.equals("player1")) {
+                editor.putInt("player", 1);
+            } else {
+                editor.putInt("player", 2);
+            }
+            editor.putInt("x", (int) x);
+            editor.putInt("y", (int) y);
+            editor.putString("direction", d);
+            editor.apply();
         }
-        editor.putInt("x", (int) x);
-        editor.putInt("y", (int) y);
-        editor.putString("direction", d);
-        editor.apply();
     }
 
 
@@ -188,6 +140,7 @@ public class GameActivity extends AppCompatActivity {
         builder.setPositiveButton(R.string.end, (unused1, unused2) -> {
             roomRef.child(playerID).removeValue();
             if (playerID.equals("player1")) {
+                roomRef.child("host left").setValue("true");
                 roomRef.removeValue();
             }
             finish();}
