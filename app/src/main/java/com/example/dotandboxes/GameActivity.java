@@ -38,18 +38,18 @@ public class GameActivity extends AppCompatActivity {
         roomID = pref.getString("room", "");
         roomRef = database.getReference("rooms/" + roomID);
         playerID = pref.getString("playerID", "");
-        String other;
+        int other;
         if (playerID.equals("player1")) {
-            other = "player2";
+            other = 2;
         } else {
-            other = "player1";
+            other = 1;
         }
         setContentView(R.layout.activity_game);
         TextView playerColor = findViewById(R.id.textView);
-
-        roomRef.child(other).child("player").addValueEventListener(new ValueEventListener() {
+        roomRef.child("player" + other).child("player").addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot data) {
+                System.out.println(data.exists());
                 if (data.exists()) {
                     otherPlayer = data.getValue().toString();
                     if (playerID.equals("player1")) {
@@ -57,10 +57,17 @@ public class GameActivity extends AppCompatActivity {
                     } else {
                         playerColor.setText(getResources().getString(R.string.player, "BLUE", otherPlayer));
                     }
+                    System.out.println(otherPlayer);
                     SharedPreferences pref = getSharedPreferences("start", 0);
                     SharedPreferences.Editor editor = pref.edit();
                     editor.putBoolean("start", true);
                     editor.apply();
+                } else {
+                    if (playerID.equals("player1")) {
+                        playerColor.setText(getResources().getString(R.string.player, "RED", "NONE"));
+                    } else {
+                        playerColor.setText(getResources().getString(R.string.player, "BLUE", "NONE"));
+                    }
                 }
             }
             @Override
@@ -80,15 +87,16 @@ public class GameActivity extends AppCompatActivity {
             }
         });
 
-        roomRef.child(other).addValueEventListener(new ValueEventListener() {
+
+        roomRef.child("player" + other).addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot data) {
-                if (data.child("x").exists() && data.child("y").exists() && data.child("direction").exists()) {
-                    String direction = data.child("direction").getValue().toString();
-                    long x = (long) data.child("x").getValue();
-                    long y = (long) data.child("y").getValue();
-                    System.out.println(data.getValue());
-                    packageInfo(x,y, other, direction);
+                if (data.child("x").exists() && data.child("y").exists()) {
+                    double x = (double) data.child("x").getValue();
+                    double y = (double) data.child("y").getValue();
+                    System.out.println(x + " and " + y);
+                    packageInfo(x,y, other);
+                    findViewById(R.id.gameView).postInvalidate();
                 }
             }
 
@@ -100,6 +108,8 @@ public class GameActivity extends AppCompatActivity {
 
 
 
+
+
         //the exit game button
         Button exit = findViewById(R.id.exit);
         exit.setOnClickListener(v -> {
@@ -107,22 +117,18 @@ public class GameActivity extends AppCompatActivity {
         });
     }
 
-    private void packageInfo(long x, long y, String p, String d) {
-        SharedPreferences pref = getSharedPreferences("UPDATE", 0);
-        boolean send = pref.getBoolean("start", false);
-        if (send) {
-            SharedPreferences.Editor editor = pref.edit();
-            if (p.equals("player1")) {
-                editor.putInt("player", 1);
-            } else {
-                editor.putInt("player", 2);
-            }
-            editor.putInt("x", (int) x);
-            editor.putInt("y", (int) y);
-            editor.putString("direction", d);
-            editor.apply();
-        }
+
+    private void packageInfo(double x, double y, int p) {
+        SharedPreferences pref = getSharedPreferences("UPDATES", 0);
+        SharedPreferences.Editor editor = pref.edit();
+        editor.putInt("player", p);
+        editor.putFloat("x",(float) x);
+        editor.putFloat("y", (float) y);
+        editor.apply();
+        System.out.println(pref.getFloat("x", -1.2f));
     }
+
+
 
 
     @Override

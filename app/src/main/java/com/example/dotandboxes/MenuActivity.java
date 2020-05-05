@@ -51,9 +51,22 @@ public class MenuActivity extends AppCompatActivity {
             createGame.setEnabled(false);
             createGame();
         });
+        database.getReference("rooms/" + playerName).child("size").setValue(3);
         //handles connection in multiplayer
         findViewById(R.id.retryConnectButton).setOnClickListener(unused -> connect());
         connect();
+
+        lobbyRef = database.getReference("rooms");
+        lobbyRef.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                connect();
+            }
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+                //error
+            }
+        });
     }
 
     @Override
@@ -76,7 +89,6 @@ public class MenuActivity extends AppCompatActivity {
         TextView ownerLabel =findViewById(R.id.create_game_owner);
         ownerLabel.setText(getResources().getString(R.string.game_owner, playerName));
         newRoomRef = database.getReference("rooms/" + playerName);
-        newRoomRef.child("player1").setValue(playerName);
         newRoomRef.child("size").setValue(3);
         SeekBar bar = findViewById(R.id.seekBar);
         TextView sizeDisplay = findViewById(R.id.sizeDisplay);
@@ -109,6 +121,7 @@ public class MenuActivity extends AppCompatActivity {
             editor.putString("room", playerName);
             editor.putString("playerID", "player1");
             editor.apply();
+            newRoomRef.child("player1").child("player").setValue(playerName);
             startActivity(intent);
         });
     }
@@ -133,10 +146,10 @@ public class MenuActivity extends AppCompatActivity {
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 Iterable<DataSnapshot> rooms = dataSnapshot.getChildren();
                 for(DataSnapshot snapshot: rooms) {
-                    if (snapshot.child("player2").getValue() == null
-                        && snapshot.child("player1").getValue() != null) {
+                    if (snapshot.child("player2").child("player").getValue() == null
+                        && snapshot.child("player1").child("player").getValue() != null) {
                         Long size = (Long) snapshot.child("size").getValue();
-                        lobbyList.put(snapshot.child("player1").getValue().toString(), size);
+                        lobbyList.put(snapshot.child("player1").child("player").getValue().toString(), size);
                     }
                 }
                 setUpUi(lobbyList);
@@ -165,7 +178,7 @@ public class MenuActivity extends AppCompatActivity {
             }
             join.setOnClickListener(v -> {
                 lobbyRef = database.getReference("rooms");
-                lobbyRef.child(room.getKey()).child("player2").setValue(playerName);
+                lobbyRef.child(room.getKey()).child("player2").child("player").setValue(playerName);
                 SharedPreferences pref = getSharedPreferences("PREFS", 0);
                 SharedPreferences.Editor editor = pref.edit();
                 editor.putString("playerID", "player2");

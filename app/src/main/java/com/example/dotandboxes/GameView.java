@@ -11,8 +11,13 @@ import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
 
+import androidx.annotation.NonNull;
+
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
 public class GameView extends View {
     private float lineLength;
@@ -73,66 +78,60 @@ public class GameView extends View {
         init();
     }
 
-
     @Override
     public boolean onTouchEvent(MotionEvent event) {
-        if (event.getAction() == MotionEvent.ACTION_UP) {
+        if (event.getAction() == MotionEvent.ACTION_UP && board != null) {
             float x = event.getX();
             float y = event.getY();
-
-            if (x >= boardX && x <= boardX + boardWidth && y >= boardY && y <= boardY + boardHeight) {
-                x -= boardX;
-                y -= boardY;
-
-                float disX = x % lineLength;
-                float disY = y % lineLength;
-                int cellX = (int) (x / lineLength);
-                int cellY = (int) (y / lineLength);
-                String direction;
-                if (disX + disY > lineLength) {
-                    if (disX > disY) {
-                        board.placeLine(cellX + 1, cellY, player, "vertical");
-                        direction = "vertical";
-                    } else {
-                        board.placeLine(cellX, cellY + 1, player, "horizontal");
-                        direction = "horizontal";
-                    }
-                } else {
-                    if (disX > disY) {
-                        board.placeLine(cellX , cellY, player, "horizontal");
-                        direction = "vertical";
-                    } else {
-                        board.placeLine(cellX, cellY, player, "vertical");
-                        direction = "horizontal";
-                    }
-                }
-                roomRef.child(playerID).child("x").setValue(cellX);
-                roomRef.child(playerID).child("y").setValue(cellY);
-                roomRef.child(playerID).child("direction").setValue(direction);
-                invalidate();
-            }
+            drawNew(x, y, player);
+            invalidate();
+            roomRef.child(playerID).child("x").setValue(x);
+            roomRef.child(playerID).child("y").setValue(y);
         }
         return true;
+    }
+
+    private void drawNew(float x, float y, int p) {
+        if (x >= boardX && x <= boardX + boardWidth && y >= boardY && y <= boardY + boardHeight) {
+            x -= boardX;
+            y -= boardY;
+
+            float disX = x % lineLength;
+            float disY = y % lineLength;
+            int cellX = (int) (x / lineLength);
+            int cellY = (int) (y / lineLength);
+            String direction;
+            if (disX + disY > lineLength) {
+                if (disX > disY) {
+                    board.placeLine(cellX + 1, cellY, p, "vertical");
+                    direction = "vertical";
+                } else {
+                    board.placeLine(cellX, cellY + 1, p, "horizontal");
+                    direction = "horizontal";
+                }
+            } else {
+                if (disX > disY) {
+                    board.placeLine(cellX, cellY, p, "horizontal");
+                    direction = "vertical";
+                } else {
+                    board.placeLine(cellX, cellY, p, "vertical");
+                    direction = "horizontal";
+                }
+            }
+        }
     }
 
     @Override
     public void onDraw(Canvas canvas) {
 
-        //takes information sent from database and fill in the grids
-        SharedPreferences pref = getContext().getSharedPreferences("UPDATE", 0);
-        int xother = pref.getInt("x", -1);
-        int yother = pref.getInt("y", -1);
-        int p = pref.getInt("player", 0);
-        //System.out.println(xother);
-        String dir = pref.getString("direction", "");
-        if (xother >= 0) {
-            board.placeLine(xother, yother, p, dir);
+        SharedPreferences star = getContext().getSharedPreferences("start", 0);
+        if (star.getBoolean("start", false)) {
+            SharedPreferences pack = getContext().getSharedPreferences("UPDATES", 0);
+            System.out.println(pack.getFloat("x", -1.2f) + "here");
+            drawNew(pack.getFloat("x", -1.0342f), pack.getFloat("y", -1.0123f), pack.getInt("player", 0));
         }
 
-
-
-
-        //declaring variables
+               //declaring variables
         int s = board.getSize();
         float xOrigin = (float) boardX;
         float yOrigin = (float) boardY;
