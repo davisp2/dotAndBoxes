@@ -123,6 +123,7 @@ public class MenuActivity extends AppCompatActivity {
             editor.putBoolean("started", false);
             editor.apply();
             newRoomRef.child("player1").child("player").setValue(playerName);
+            newRoomRef.child("size").setValue(pref.getInt("size", 3));
             System.out.println(pref.getBoolean("start", false) + "at launch");
             startActivity(intent);
         });

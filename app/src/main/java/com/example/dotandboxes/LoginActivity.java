@@ -36,8 +36,8 @@ public class LoginActivity extends AppCompatActivity {
         edit.clear();
         edit.apply();
 
-        SharedPreferences update = getSharedPreferences("UPDATES", 0);
-        SharedPreferences.Editor editg = preferences.edit();
+        SharedPreferences update = getSharedPreferences("UPDATE CELL", 0);
+        SharedPreferences.Editor editg = update.edit();
         editg.clear();
         editg.apply();
 

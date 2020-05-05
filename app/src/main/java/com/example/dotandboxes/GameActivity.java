@@ -94,9 +94,12 @@ public class GameActivity extends AppCompatActivity {
                     long x = (long) data.child("x").getValue();
                     long y = (long) data.child("y").getValue();
                     String dir = data.child("direction").getValue().toString();
+                    roomRef.child("player"+other).child("x").removeValue();
+                    roomRef.child("player"+other).child("y").removeValue();
+                    roomRef.child("player"+other).child("direction").removeValue();
                     packageInfo(x,y, other, dir);
-                    findViewById(R.id.gameView).postInvalidate();
                 }
+                findViewById(R.id.gameView).postInvalidate();
             }
 
             @Override
@@ -118,9 +121,12 @@ public class GameActivity extends AppCompatActivity {
 
 
     private void packageInfo(long x, long y, int p, String dir) {
-        SharedPreferences pref = getSharedPreferences("UPDATES", 0);
+        SharedPreferences pref = getSharedPreferences("UPDATE CELL", 0);
         SharedPreferences.Editor editor = pref.edit();
-        editor.clear();
+        editor.remove("x");
+        editor.remove("y");
+        editor.remove("direction");
+        editor.remove("player");
         editor.putInt("player", p);
         editor.putInt("x",(int) x);
         editor.putInt("y", (int) y);
