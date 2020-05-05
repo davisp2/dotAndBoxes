@@ -14,8 +14,12 @@
     <string name="cancel">Cancel</string>
     <string name="loggingin">LOGGING IN</string>
     <string name="create">Create</string>
-    <string name="end_conf">Are you sure you want to exit? </string>
+    <string name="end_conf">Are you sure you want to exit? All progress will be lost after disconnecting </string>
+    <string name="end_conf2">Are you sure you want to exit? Exiting as the game owner will shut down this game. </string>
     <string name="attribute">expand</string>
     <string name="slide_start">3 by 3</string>
-    <string name="slide_end">30 by 30</string>
+    <string name="slide_end">18 by 18</string>
+    <string name="player">You are %s. Your opponent is %s</string>
+    <string name="warning">Username is taken. Try another one</string>
+    <string name="welcome">Dots and Boxes!</string>
 </resources>

@@ -30,6 +30,7 @@ public class MenuActivity extends AppCompatActivity {
     DatabaseReference newRoomRef;
     Button createGame;
     Map<String, Long> lobbyList;
+    DatabaseReference playerRef;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -61,6 +62,7 @@ public class MenuActivity extends AppCompatActivity {
         connect();
     }
 
+
     private void createGame() {
 
 
@@ -87,7 +89,10 @@ public class MenuActivity extends AppCompatActivity {
                 int value = 3 + (progress);
                 sizeDisplay.setText(getResources().getString(R.string.game_size, value, value));
                 newRoomRef.child("size").setValue(value);
-                intent.putExtra("roomSize", value);
+                SharedPreferences pref = getSharedPreferences("PREFS", 0);
+                SharedPreferences.Editor editor = pref.edit();
+                editor.putInt("size", value);
+                editor.apply();
             }
             @Override
             public void onStopTrackingTouch(SeekBar seekBar) {
@@ -99,14 +104,22 @@ public class MenuActivity extends AppCompatActivity {
         });
         Button create = findViewById(R.id.create);
         create.setOnClickListener(unused -> {
-            intent.putExtra("roomName", playerName);
+            SharedPreferences pref = getSharedPreferences("PREFS", 0);
+            SharedPreferences.Editor editor = pref.edit();
+            editor.putString("room", playerName);
+            editor.putString("playerID", "player1");
+            editor.apply();
             startActivity(intent);
         });
     }
 
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        database.getReference("player").child(playerName).removeValue();
+    }
 
     private void connect() {
-        Log.d("MenuActivity", "connect");
         findViewById(R.id.OpenLobbyGroup).setVisibility(View.GONE);
         findViewById(R.id.loadGroup).setVisibility(View.GONE);
         getLobbies();
@@ -120,9 +133,10 @@ public class MenuActivity extends AppCompatActivity {
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 Iterable<DataSnapshot> rooms = dataSnapshot.getChildren();
                 for(DataSnapshot snapshot: rooms) {
-                    if (snapshot.child("player2").getValue() == null) {
+                    if (snapshot.child("player2").getValue() == null
+                        && snapshot.child("player1").getValue() != null) {
                         Long size = (Long) snapshot.child("size").getValue();
-                        lobbyList.put((String) snapshot.child("player1").getValue(), size);
+                        lobbyList.put(snapshot.child("player1").getValue().toString(), size);
                     }
                 }
                 setUpUi(lobbyList);
@@ -142,17 +156,23 @@ public class MenuActivity extends AppCompatActivity {
         openLayout.removeAllViews();
         openLayout.setVisibility(View.VISIBLE);
         for (Map.Entry<String, Long> room : lobby.entrySet()) {
-            Log.d("Menu", room.getKey());
             View chunk = getLayoutInflater().inflate(R.layout.chunk_open_lobby,
                     openLayout, false);
             openLayout.addView(chunk);
             Button join = chunk.findViewById(R.id.join_game);
+            if (room.getKey().equals(playerName)) {
+                join.setEnabled(false);
+            }
             join.setOnClickListener(v -> {
                 lobbyRef = database.getReference("rooms");
                 lobbyRef.child(room.getKey()).child("player2").setValue(playerName);
-                Intent intent = new Intent(this, GameActivity.class);
-                intent.putExtra("gameID", room.getKey());
-                startActivity(intent);
+                SharedPreferences pref = getSharedPreferences("PREFS", 0);
+                SharedPreferences.Editor editor = pref.edit();
+                editor.putString("playerID", "player2");
+                editor.putString("room", room.getKey());
+                editor.putInt("size", room.getValue().intValue());
+                editor.apply();
+                startActivity(new Intent(this, GameActivity.class));
             });
             TextView ownerLabel = chunk.findViewById(R.id.game_owner);
             ownerLabel.setText(getResources().getString(R.string.game_owner, room.getKey()));

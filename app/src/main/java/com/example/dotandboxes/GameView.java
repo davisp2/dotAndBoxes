@@ -1,6 +1,7 @@
 package com.example.dotandboxes;
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.content.res.Resources;
 import android.graphics.Canvas;
 import android.graphics.Color;
@@ -10,6 +11,9 @@ import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
 
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+
 public class GameView extends View {
     private float lineLength;
     private Paint paint;
@@ -18,11 +22,23 @@ public class GameView extends View {
     private double boardY;
     private double boardHeight;
     private double boardWidth;
+    private int player;
+    private DatabaseReference roomRef;
+    private FirebaseDatabase db;
+    private String playerID;
 
     private void init() {
-        //note: this size is at a temporary value. If we have time, we can add an option
-        //for the user to change the size.
-        int size = 3;
+        SharedPreferences pref = getContext().getSharedPreferences("PREFS", 0);
+        int size = pref.getInt("size", 0);
+        playerID = pref.getString("playerID", "");
+        String roomID = pref.getString("room", "");
+        db = FirebaseDatabase.getInstance();
+        roomRef = db.getReference("rooms/" + roomID);
+        if (playerID.equals("player1")) {
+            player = 1;
+        } else {
+            player = 2;
+        }
         float textSize = 100;
         paint = new Paint();
         paint.setTextSize(textSize);
@@ -37,7 +53,7 @@ public class GameView extends View {
         boardHeight = boardWidth;
         boardX = viewWidth * .125;
         boardY = viewHeight/2 - (boardHeight) / 2;
-        System.out.println(getWidth() + " : " + size + " : " + lineLength + " : " + lineThickness);
+        //System.out.println(getWidth() + " : " + size + " : " + lineLength + " : " + lineThickness);
         paint.setColor(Color.BLACK);
         paint.setStrokeWidth(lineThickness);
     }
@@ -57,6 +73,7 @@ public class GameView extends View {
         init();
     }
 
+
     @Override
     public boolean onTouchEvent(MotionEvent event) {
         if (event.getAction() == MotionEvent.ACTION_UP) {
@@ -71,19 +88,27 @@ public class GameView extends View {
                 float disY = y % lineLength;
                 int cellX = (int) (x / lineLength);
                 int cellY = (int) (y / lineLength);
+                String direction;
                 if (disX + disY > lineLength) {
                     if (disX > disY) {
-                        board.placeLine(cellX + 1, cellY, 1, "vertical");
+                        board.placeLine(cellX + 1, cellY, player, "vertical");
+                        direction = "vertical";
                     } else {
-                        board.placeLine(cellX, cellY + 1, 1, "horizontal");
+                        board.placeLine(cellX, cellY + 1, player, "horizontal");
+                        direction = "horizontal";
                     }
                 } else {
                     if (disX > disY) {
-                        board.placeLine(cellX , cellY, 1, "horizontal");
+                        board.placeLine(cellX , cellY, player, "horizontal");
+                        direction = "vertical";
                     } else {
-                        board.placeLine(cellX, cellY, 1, "vertical");
+                        board.placeLine(cellX, cellY, player, "vertical");
+                        direction = "horizontal";
                     }
                 }
+                roomRef.child(playerID).child("x").setValue(cellX);
+                roomRef.child(playerID).child("y").setValue(cellY);
+                roomRef.child(playerID).child("direction").setValue(direction);
                 invalidate();
             }
         }
@@ -92,11 +117,25 @@ public class GameView extends View {
 
     @Override
     public void onDraw(Canvas canvas) {
+
+        //takes information sent from database and fill in the grids
+        SharedPreferences pref = getContext().getSharedPreferences("UPDATE", 0);
+        int xother = pref.getInt("x", -1);
+        int yother = pref.getInt("y", -1);
+        int p = pref.getInt("player", 0);
+        //System.out.println(xother);
+        String dir = pref.getString("direction", "");
+        if (xother >= 0) {
+            board.placeLine(xother, yother, p, dir);
+        }
+
+
+
+
         //declaring variables
         int s = board.getSize();
         float xOrigin = (float) boardX;
         float yOrigin = (float) boardY;
-
         //DRAWING BOARD
         //drawing colored cells first
         int[][] cO = board.getCellOwnership();
