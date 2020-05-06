@@ -25,40 +25,47 @@ public class GameBoard {
 
     public boolean placeLine(int x, int y, int player, String lineType) {
         if (x >= 0 && y >= 0 && turn[player] == 1) {
+            boolean flag = true;
             if (lineType.equals("horizontal") && x < horizontalLines.length && y < horizontalLines[0].length) {
                 if (!horizontalLines[x][y]) {
                     horizontalLines[x][y] = true;
-                    checkCellCaptured(x, y, player);
-                    checkCellCaptured(x, y - 1, player);
+                    if (checkCellCaptured(x, y, player) || checkCellCaptured(x, y - 1, player)) {
+                        flag = false;
+                    }
                 }
             } else if (lineType.equals("vertical") && x < verticalLines.length && y < verticalLines[0].length ) {
                 if (!verticalLines[x][y]) {
                     verticalLines[x][y] = true;
-                    checkCellCaptured(x, y, player);
-                    checkCellCaptured(x - 1, y, player);
+                    if (checkCellCaptured(x, y, player) || checkCellCaptured(x - 1, y, player)) {
+                        flag = false;
+                    }
                 }
             }
             System.out.println("drawn" + lineType + "" + x + "" + y + "player" + player);
-            if (player == 1) {
-                turn[1] = 0;
-                turn[2] = 1;
-            } else {
-                turn[1] =1 ;
-                turn[2] = 0;
+            if (flag) {
+                if (player == 1) {
+                    turn[1] = 0;
+                    turn[2] = 1;
+                } else {
+                    turn[1] = 1;
+                    turn[2] = 0;
+                }
             }
             return true;
         }
         return false;
     }
 
-    private void checkCellCaptured(int x, int y, int player) {
+    private boolean checkCellCaptured(int x, int y, int player) {
         if (x >= 0 && x < size && y >= 0 && y < size) {
             if (horizontalLines[x][y] && horizontalLines[x][y + 1]
                     && verticalLines[x][y] && verticalLines[x + 1][y]) {
                 cellOwnership[x][y] = player;
                 score[player - 1]++;
+                return true;
             }
         }
+        return false;
     }
 
     public int[] getScore() {
